@@ -59,9 +59,9 @@ This is a living resource. Current coverage:
 
 | Dimension | Status |
 |---|---|
-| Well-Architected Philosophy | MVP |
+| Well-Architected Philosophy | Complete |
 | AI/ML Service Model | Planned |
-| GenAI Architecture Patterns | MVP |
+| GenAI Architecture Patterns | Complete |
 | MLOps / GenAIOps | Planned |
 | Operating Model | Planned |
 | Reference Architecture Style | Planned |
