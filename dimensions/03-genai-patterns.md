@@ -4,6 +4,39 @@
 **Bedrock version/features noted:** Bedrock with 100+ foundation models (Claude Opus 4.6, Nova 2, DeepSeek V3.2, etc.); Knowledge Bases with multimodal RAG and agentic retrieval; Agents with action groups and multi-step orchestration; Guardrails with Standard tier code-aware filtering; Custom Models with supervised fine-tuning, reinforcement fine-tuning, and distillation.
 **Azure OpenAI version/features noted:** Azure OpenAI with GPT-5.4/5.3/5.2/5.1/5 series, o-series reasoning models; Microsoft Foundry (formerly Azure AI Studio) with unified agent service; Azure AI Search with agentic retrieval (preview); Content Safety with task adherence API; Fine-tuning with SFT, DPO, and RFT methods.
 
+## Pattern Overview
+
+```mermaid
+graph TB
+    subgraph Patterns["GenAI Patterns Compared"]
+        direction TB
+        RAG["RAG<br/><i>Retrieval-Augmented Generation</i>"]
+        AGT["Agents<br/><i>Multi-step tool-using workflows</i>"]
+        FT["Fine-tuning<br/><i>Model weight customization</i>"]
+        GR["Guardrails<br/><i>Content safety & compliance</i>"]
+        ORC["Orchestration<br/><i>Workflow coordination</i>"]
+    end
+
+    subgraph Value["Cloud Governance Value"]
+        direction TB
+        HIGH["🟢 HIGH: Guardrails, Identity"]
+        MED["🟡 MEDIUM: Fine-tuning, Monitoring"]
+        LOW["🔴 LOW: RAG pipeline, Orchestration"]
+    end
+
+    GR --> HIGH
+    AGT --> MED
+    FT --> MED
+    RAG --> LOW
+    ORC --> LOW
+
+    style HIGH fill:#d4edda,stroke:#155724,color:#333
+    style MED fill:#fff3cd,stroke:#856404,color:#333
+    style LOW fill:#f8d7da,stroke:#721c24,color:#333
+```
+
+> For each pattern below: what does each cloud recommend, what is the open-source equivalent, and what governance does the cloud version actually add?
+
 ---
 
 ## Section 1: What does AWS recommend?
@@ -49,6 +82,38 @@ AWS does not prescribe a single orchestration framework. The recommended pattern
 - [Bedrock Guardrails](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html)
 - [Bedrock Custom Models](https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html)
 - [AWS Generative AI Lens](https://docs.aws.amazon.com/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html)
+
+### RAG Architecture: AWS vs Azure at a Glance
+
+```mermaid
+graph LR
+    subgraph AWS_RAG["AWS: Bedrock Knowledge Bases"]
+        direction TB
+        AS["Data Sources<br/><i>S3, SharePoint,<br/>Confluence, DBs</i>"]
+        AC["Chunk + Embed<br/><i>managed pipeline</i>"]
+        AV["Vector Store<br/><i>OpenSearch, Pinecone,<br/>Aurora, Redis</i>"]
+        AM["Bedrock Model<br/><i>retrieve + generate</i>"]
+        AG["Guardrails<br/><i>input + output</i>"]
+
+        AS --> AC --> AV --> AM --> AG
+    end
+
+    subgraph Azure_RAG["Azure: AI Search + On Your Data"]
+        direction TB
+        ZS["Data Sources<br/><i>Blob, Cosmos DB,<br/>SharePoint, SQL</i>"]
+        ZC["Skillsets<br/><i>chunk + enrich + embed</i>"]
+        ZV["AI Search Index<br/><i>vector + keyword +<br/>semantic ranking</i>"]
+        ZM["Azure OpenAI<br/><i>retrieve + generate</i>"]
+        ZG["Content Safety<br/><i>input + output</i>"]
+
+        ZS --> ZC --> ZV --> ZM --> ZG
+    end
+
+    style AWS_RAG fill:#fff8e6,stroke:#cc7a00,color:#333
+    style Azure_RAG fill:#e6f2ff,stroke:#005a9e,color:#333
+```
+
+> Both follow the same pipeline stages. The difference: Bedrock Knowledge Bases is purpose-built for RAG. Azure AI Search is a mature search platform extended for RAG, which gives you more search features but more configuration decisions.
 
 ---
 
@@ -103,19 +168,60 @@ Microsoft Foundry provides a higher-level orchestration surface. Workflow agents
 
 ## Section 3: Where do they agree
 
-Both clouds treat RAG as the default first step for grounding model responses in proprietary data. Neither recommends jumping straight to fine-tuning. AWS's GenAI Lens explicitly positions RAG before fine-tuning in the customization hierarchy. Azure's AI workload guidance treats grounding data as a primary design area. Both provide managed vector storage, chunking, embedding generation, and retrieval as integrated pipeline steps. Both support hybrid search (combining keyword and vector retrieval) and reranking to improve retrieval quality. The convergence here is strong: RAG is the pattern both clouds invest in most heavily, and the managed services follow the same pipeline stages.
+Both clouds treat RAG as the default first step for grounding model responses in proprietary data. Neither recommends jumping straight to fine-tuning. AWS's GenAI Lens explicitly positions RAG before fine-tuning in the customization hierarchy. Azure's AI workload guidance treats grounding data as a primary design area.
 
-Both clouds also converge on guardrails as a non-negotiable production requirement, not an optional feature. Both provide content filtering that runs by default on model deployments, with configurable severity thresholds and custom policies. Both support PII detection, topic blocking, and prompt injection detection. Both offer standalone APIs for their guardrails (Bedrock's ApplyGuardrail API, Azure's Content Safety REST API), meaning you can use them independently of the model hosting service. And both are investing in hallucination detection: Bedrock through contextual grounding checks, Azure through groundedness detection. When both clouds independently build the same guardrails capabilities with the same architectural pattern (configurable filters applied to both input and output, with a standalone API), that is a strong signal that this is the minimum viable safety architecture for production GenAI.
+Both provide managed vector storage, chunking, embedding generation, and retrieval as integrated pipeline steps. Both support hybrid search (combining keyword and vector retrieval) and reranking to improve retrieval quality. The convergence is strong: RAG is the pattern both clouds invest in most heavily.
+
+Both clouds also converge on guardrails as a non-negotiable production requirement. Both provide content filtering that runs by default on model deployments, with configurable severity thresholds and custom policies. Both support PII detection, topic blocking, and prompt injection detection.
+
+Both offer standalone APIs for their guardrails (Bedrock's ApplyGuardrail API, Azure's Content Safety REST API), meaning you can use them independently of the model hosting. And both are investing in hallucination detection: Bedrock through contextual grounding checks, Azure through groundedness detection.
+
+When both clouds independently build the same capabilities with the same architectural pattern (configurable filters on input and output, with a standalone API), that is a strong signal this is the minimum viable safety architecture for production GenAI.
 
 ---
 
 ## Section 4: Where do they diverge, and why
 
-**Purpose-built RAG service vs. extended search platform.** Bedrock Knowledge Bases is a service built specifically for RAG. You provide a data source, and it handles chunking, embedding, storage, retrieval, and generation in one managed pipeline. Azure AI Search is a mature search platform (years older than the GenAI wave) that has been extended to support RAG through vector search, AI enrichment skillsets, and agentic retrieval. The practical consequence: Bedrock Knowledge Bases gets you to a working RAG pipeline faster with fewer configuration decisions. Azure AI Search gives you more search capabilities (faceted navigation, geo-spatial queries, document-level security trimming) but requires more architectural decisions upfront. Azure's approach reflects its enterprise search heritage. AWS's approach reflects a bet that most teams adopting RAG do not need a full search platform; they need a retrieval pipeline for their AI application.
+**Purpose-built RAG service vs. extended search platform.** Bedrock Knowledge Bases is a service built specifically for RAG. You provide a data source, and it handles chunking, embedding, storage, retrieval, and generation in one managed pipeline.
 
-**Guardrails as a cross-cutting feature vs. a standalone service.** Bedrock Guardrails are a feature within the Bedrock ecosystem. You create a guardrail, attach it to a model, agent, or knowledge base, and it runs as part of the inference pipeline. The ApplyGuardrail API extends this to standalone use, but the primary design pattern is "guardrail attached to a Bedrock resource." Azure AI Content Safety is an independent service with its own resource, pricing tier, and API. It is integrated with Azure OpenAI (content filtering is on by default), but it is also a first-class service that can moderate content from any source, not just AI-generated content. Azure designed it this way because Content Safety serves a broader market: gaming companies moderating user-generated content, social platforms, and enterprise media companies, not just GenAI applications. AWS's design is tighter and simpler for GenAI use cases. Azure's design is more flexible but introduces another service to manage.
+Azure AI Search is a mature search platform (years older than the GenAI wave) that has been extended to support RAG through vector search, AI enrichment skillsets, and agentic retrieval.
 
-**Orchestration philosophy: code-first vs. platform-first.** AWS's orchestration story is intentionally minimal. Bedrock Agents handle model-driven orchestration (the model decides what to do next). For everything else, you write code: Lambda functions, Step Functions, custom applications. There is no visual builder for agent workflows. Azure invests heavily in platform-level orchestration: workflow agents with visual builders, Semantic Kernel as an open-source middleware layer, the Foundry portal as a unified management surface. Azure's hosted agents even let you deploy LangGraph code as a managed container. The divergence reflects different philosophies about where orchestration logic should live. AWS says orchestration is your code, running on general-purpose compute, with the model as one component. Azure says orchestration is a platform concern, and the platform should provide tools (visual, code, and hybrid) to build it. Teams that prefer full control over their orchestration layer will lean toward AWS's approach. Teams that want a managed orchestration surface with built-in observability and publishing channels will lean toward Azure's.
+The practical consequence: Bedrock gets you to a working RAG pipeline faster with fewer configuration decisions. Azure AI Search gives you more search capabilities (faceted navigation, geo-spatial queries, document-level security trimming) but requires more architectural decisions upfront. Azure reflects its enterprise search heritage. AWS reflects a bet that most teams need a retrieval pipeline, not a full search platform.
+
+**Guardrails as a cross-cutting feature vs. a standalone service.** Bedrock Guardrails are a feature within the Bedrock ecosystem. You create a guardrail, attach it to a model, agent, or knowledge base, and it runs as part of the inference pipeline. The ApplyGuardrail API extends this to standalone use, but the primary pattern is "guardrail attached to a Bedrock resource."
+
+Azure AI Content Safety is an independent service with its own resource, pricing tier, and API. It is integrated with Azure OpenAI (content filtering is on by default), but it also moderates content from any source, not just AI-generated content. Azure designed it this way because Content Safety serves a broader market: gaming, social platforms, and enterprise media, not just GenAI.
+
+AWS's design is tighter and simpler for GenAI use cases. Azure's design is more flexible but introduces another service to manage.
+
+**Orchestration philosophy: code-first vs. platform-first.**
+
+```mermaid
+graph TB
+    subgraph AWS_Orch["AWS: Code-First"]
+        direction TB
+        BA["Bedrock Agents<br/><i>model-driven orchestration</i>"]
+        SF["Step Functions<br/><i>deterministic workflows</i>"]
+        LC["Lambda + Custom Code<br/><i>everything else</i>"]
+    end
+
+    subgraph Azure_Orch["Azure: Platform-First"]
+        direction TB
+        WA["Workflow Agents<br/><i>visual builder + YAML</i>"]
+        SK["Semantic Kernel<br/><i>open-source SDK</i>"]
+        HA["Hosted Agents<br/><i>deploy LangGraph<br/>as managed container</i>"]
+        PUB["Publishing<br/><i>Teams, M365, containers</i>"]
+    end
+
+    style AWS_Orch fill:#fff8e6,stroke:#cc7a00,color:#333
+    style Azure_Orch fill:#e6f2ff,stroke:#005a9e,color:#333
+```
+
+AWS's orchestration story is intentionally minimal. Bedrock Agents handle model-driven orchestration. For everything else, you write code. There is no visual builder.
+
+Azure invests heavily in platform-level orchestration: workflow agents with visual builders, Semantic Kernel as middleware, the Foundry portal as a unified management surface. Azure's hosted agents even let you deploy LangGraph code as a managed container.
+
+The divergence reflects different philosophies about where orchestration logic should live. AWS says orchestration is your code. Azure says orchestration is a platform concern. Teams that prefer full control lean toward AWS. Teams that want a managed surface with built-in observability and publishing lean toward Azure.
 
 ---
 

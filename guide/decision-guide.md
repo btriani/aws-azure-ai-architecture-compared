@@ -2,7 +2,33 @@
 
 **Last updated:** 2026-04-10
 
-This guide walks through three questions, in order. Each one narrows the decision. If you want the deep analysis behind any answer, follow the links to the dimension docs.
+This guide walks through three questions, in order. Each one narrows the decision.
+
+```mermaid
+flowchart TD
+    Q1{"Do I need a cloud<br/>AI platform at all?"}
+    Q2{"Which cloud's<br/>philosophy fits?"}
+    Q3{"What governance<br/>should I turn on?"}
+    OS["Direct API + Open Source<br/><i>Claude API, LangGraph, etc.</i>"]
+    AWS["AWS approach<br/><i>Building blocks, you compose</i>"]
+    AZ["Azure approach<br/><i>Integrated platform, guided path</i>"]
+    GOV["Configure governance:<br/>Identity, Network, Guardrails,<br/>Monitoring, Cost controls"]
+
+    Q1 -->|"No compliance, small team,<br/>prototype"| OS
+    Q1 -->|"Compliance needs, multi-team,<br/>production"| Q2
+    Q2 -->|"Want control,<br/>willing to assemble"| AWS
+    Q2 -->|"Want guided path,<br/>faster first result"| AZ
+    AWS --> Q3
+    AZ --> Q3
+    Q3 --> GOV
+
+    style OS fill:#f9f9f9,stroke:#666,color:#333
+    style AWS fill:#ff9900,stroke:#cc7a00,color:#fff
+    style AZ fill:#0078d4,stroke:#005a9e,color:#fff
+    style GOV fill:#d4edda,stroke:#155724,color:#333
+```
+
+If you want the deep analysis behind any answer, follow the links to the dimension docs.
 
 ---
 

@@ -4,13 +4,56 @@
 **AWS WAF version:** November 6, 2024 (base framework); November 19, 2025 (ML Lens and GenAI Lens)
 **Azure WAF version:** March 2026 revision (base framework); April 2026 (AI workload guidance)
 
+## How the Frameworks Compare at a Glance
+
+```mermaid
+graph TB
+    subgraph AWS["AWS Well-Architected"]
+        direction TB
+        AW_BASE["Base Framework<br/>6 Pillars"]
+        AW_ML["ML Lens"]
+        AW_GEN["GenAI Lens"]
+        AW_OTHER["Other Lenses<br/><i>SaaS, IoT, etc.</i>"]
+        AW_TOOL["WA Tool<br/><i>Question-based review</i>"]
+
+        AW_BASE --> AW_ML
+        AW_BASE --> AW_GEN
+        AW_BASE --> AW_OTHER
+        AW_ML --> AW_TOOL
+        AW_GEN --> AW_TOOL
+    end
+
+    subgraph Azure["Azure Well-Architected"]
+        direction TB
+        AZ_BASE["Base Framework<br/>5 Pillars"]
+        AZ_AI["AI Workload Guide<br/><i>5 AI-native principles</i>"]
+        AZ_OTHER["Other Workloads<br/><i>SaaS, HPC, etc.</i>"]
+        AZ_REVIEW["WA Review<br/><i>Scored assessment</i>"]
+        AZ_ADVISOR["Azure Advisor<br/><i>Automated, continuous</i>"]
+
+        AZ_BASE --> AZ_AI
+        AZ_BASE --> AZ_OTHER
+        AZ_AI --> AZ_REVIEW
+        AZ_BASE --> AZ_ADVISOR
+    end
+
+    style AWS fill:#fff8e6,stroke:#cc7a00,color:#333
+    style Azure fill:#e6f2ff,stroke:#005a9e,color:#333
+```
+
+> AWS overlays **lenses** on a flat pillar structure (each lens maps to all 6 pillars). Azure integrates **workload guides** with their own design principles and design areas. AWS reviews are question-based conversations. Azure combines scored self-assessments with automated Advisor recommendations.
+
 ---
 
 ## Section 1: What does AWS recommend?
 
-AWS structures architectural thinking around six pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability. The first five address the qualities most teams already care about. The sixth, Sustainability, was elevated to a full pillar in late 2021. This is a deliberate choice. AWS treats environmental impact as an architectural concern on the same level as cost or security, not as a nice-to-have appendix.
+AWS structures architectural thinking around six pillars: Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, and Sustainability. The first five address the qualities most teams already care about. The sixth, Sustainability, was elevated to a full pillar in late 2021. AWS treats environmental impact as an architectural concern on the same level as cost or security, not as a nice-to-have appendix.
 
-The review methodology is question-based and explicitly conversational. AWS describes the review process as "a constructive conversation about architectural decisions, and is not an audit mechanism." Reviews are meant to be lightweight (hours, not days), blame-free, and run by the team that built the architecture. For cross-team reviews, AWS recommends informal conversations followed by one or two focused meetings on ambiguities. The framework distinguishes between "two-way door" decisions (reversible, review lightly) and "one-way door" decisions (hard to reverse, inspect more rigorously). The output is a prioritized list of high-risk issues with an improvement plan, not a pass/fail grade. AWS recommends near-continuous review as architectures evolve, with formal checkpoints at early design, before go-live, and after significant changes. ([Source: AWS WAF Review Process](https://docs.aws.amazon.com/wellarchitected/latest/framework/the-review-process.html))
+The review methodology is question-based and explicitly conversational. AWS describes the review process as "a constructive conversation about architectural decisions, and is not an audit mechanism." Reviews are meant to be lightweight (hours, not days), blame-free, and run by the team that built the architecture.
+
+The framework distinguishes between "two-way door" decisions (reversible, review lightly) and "one-way door" decisions (hard to reverse, inspect more rigorously). The output is a prioritized list of high-risk issues with an improvement plan, not a pass/fail grade.
+
+AWS recommends near-continuous review as architectures evolve, with formal checkpoints at early design, before go-live, and after significant changes. ([Source: AWS WAF Review Process](https://docs.aws.amazon.com/wellarchitected/latest/framework/the-review-process.html))
 
 The **Machine Learning Lens** (November 2025) extends the base framework for ML workloads. It addresses the fundamental difference between traditional software (deterministic, step-by-step instructions) and ML systems (algorithms that learn from data through iterative cycles). The lens maps best practices to all six pillars and can be imported into the AWS Well-Architected Tool as a custom lens for structured review. Key themes include high-quality input data, continuous monitoring to detect accuracy and performance issues, model retraining with refined datasets, and responsible AI practices. The ML Lens asks questions like: *How do you ensure high-quality input data for your ML models?* and *How do you continuously monitor for accuracy and performance issues?* ([Source: AWS ML Lens](https://docs.aws.amazon.com/wellarchitected/latest/machine-learning-lens/machine-learning-lens.html))
 
@@ -50,7 +93,28 @@ These are not restatements of the base pillars. They are specific to the nature 
 
 Specific recommendations from the AI guidance include: "Use platform as a service (PaaS) over self-hosted options to simplify design and automate workflow orchestration" (Operational Excellence), "Implement role-based access control (RBAC) and/or attribute-based access control (ABAC) for both control and data planes" (Security), and "Prefer elastic compute options for orchestration tools to minimize utilization costs, because they're always-on. Avoid serverless compute for full-time operations because it can escalate costs" (Cost Optimization). These are concrete, opinionated recommendations, not questions to discuss. ([Source: Azure AI Design Principles](https://learn.microsoft.com/en-us/azure/well-architected/ai/design-principles); [Source: Azure AI Application Design](https://learn.microsoft.com/en-us/azure/well-architected/ai/application-design))
 
-**Azure Advisor** adds an automated layer that has no direct equivalent in the AWS Well-Architected ecosystem. Advisor is a digital cloud assistant that analyzes resource configuration and usage telemetry continuously and proactively. It provides actionable recommendations across five categories that map directly to the WAF pillars: Reliability, Security, Performance, Cost, and Operational Excellence. Recommendations are personalized to the actual resources deployed. Teams get a baseline of architectural recommendations passively, without initiating a review. The Advisor Score aggregates recommendations into a single number. This means Azure teams discover some architectural issues automatically, while AWS teams must actively initiate a review to surface them. ([Source: Azure Advisor](https://learn.microsoft.com/en-us/azure/advisor/advisor-overview))
+**Azure Advisor** adds an automated layer that has no direct equivalent in the AWS Well-Architected ecosystem. Advisor analyzes resource configuration and usage telemetry continuously. It provides actionable recommendations across five categories that map to the WAF pillars: Reliability, Security, Performance, Cost, and Operational Excellence.
+
+Recommendations are personalized to the actual resources deployed. Teams get a baseline of architectural recommendations passively, without initiating a review. The Advisor Score aggregates recommendations into a single number.
+
+This means Azure teams discover some architectural issues automatically, while AWS teams must actively initiate a review to surface them. ([Source: Azure Advisor](https://learn.microsoft.com/en-us/azure/advisor/advisor-overview))
+
+```mermaid
+graph LR
+    subgraph AWS_Review["AWS Review Process"]
+        direction LR
+        T1["Team decides<br/>to review"] --> T2["Answer questions<br/>in WA Tool"] --> T3["Prioritized<br/>improvement plan"]
+    end
+
+    subgraph Azure_Review["Azure Review Process"]
+        direction LR
+        A1["Run WA Review<br/>assessment"] --> A2["Scored results<br/>+ recommendations"]
+        A3["Azure Advisor<br/><i>runs continuously</i>"] --> A4["Automated<br/>recommendations"]
+    end
+
+    style AWS_Review fill:#fff8e6,stroke:#cc7a00,color:#333
+    style Azure_Review fill:#e6f2ff,stroke:#005a9e,color:#333
+```
 
 **Sources:**
 - [Azure Well-Architected Framework](https://learn.microsoft.com/en-us/azure/well-architected/)

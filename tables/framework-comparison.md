@@ -8,6 +8,41 @@
 - Azure Well-Architected Framework (March 2026 revision)
 - Azure AI workload guidance (updated April 2026)
 
+## Pillar Alignment
+
+```mermaid
+graph LR
+    subgraph AWS["AWS: 6 Pillars"]
+        A1["Operational<br/>Excellence"]
+        A2["Security"]
+        A3["Reliability"]
+        A4["Performance<br/>Efficiency"]
+        A5["Cost<br/>Optimization"]
+        A6["Sustainability"]
+    end
+
+    subgraph Azure["Azure: 5 Pillars"]
+        Z1["Operational<br/>Excellence"]
+        Z2["Security"]
+        Z3["Reliability"]
+        Z4["Performance<br/>Efficiency"]
+        Z5["Cost<br/>Optimization"]
+        Z6["<i>No equivalent pillar</i><br/>Sustainability is a<br/>workload type"]
+    end
+
+    A1 ~~~ Z1
+    A2 ~~~ Z2
+    A3 ~~~ Z3
+    A4 ~~~ Z4
+    A5 ~~~ Z5
+    A6 ~~~ Z6
+
+    style A6 fill:#fff3cd,stroke:#856404,color:#333
+    style Z6 fill:#f8d7da,stroke:#721c24,color:#333
+    style AWS fill:#fff8e6,stroke:#cc7a00,color:#333
+    style Azure fill:#e6f2ff,stroke:#005a9e,color:#333
+```
+
 ---
 
 ## Pillar-by-Pillar Comparison
